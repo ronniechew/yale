@@ -548,31 +548,73 @@
           </div>
           
           <div class="overflow-x-auto">
-            <table class="w-full border border-gray-300 min-w-[600px]">
+            <table class="w-full border border-gray-300 min-w-[500px]">
               <thead>
                 <tr class="bg-gray-50">
                   <th class="border border-gray-300 px-3 py-3 text-sm font-medium text-gray-700">Time</th>
                   <th class="border border-gray-300 px-3 py-3 text-sm font-medium text-gray-700">Sample Count</th>
-                  <th class="border border-gray-300 px-3 py-3 text-sm font-medium text-gray-700">Tally Marks</th>
+                  <th class="border border-gray-300 px-3 py-3 text-sm font-medium text-gray-700">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-for="hour in hourlySlots" :key="hour" class="hover:bg-gray-50">
                   <td class="border border-gray-300 px-3 py-3 text-sm text-gray-700 font-medium">{{ hour }}</td>
                   <td class="border border-gray-300 px-3 py-3">
-                    <input
-                      v-model="form.hourlyChecks[hour]"
-                      type="number"
-                      min="0"
-                      placeholder="0"
-                      class="w-20 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center text-base"
-                    >
+                    <div class="flex items-center space-x-2">
+                      <input
+                        v-model="form.hourlyChecks[hour]"
+                        type="number"
+                        min="0"
+                        placeholder="0"
+                        class="w-20 px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-center text-base"
+                      >
+                      <div class="flex items-center space-x-1">
+                        <button
+                          type="button"
+                          @click="incrementHourlyCount(hour)"
+                          class="w-8 h-8 bg-green-500 hover:bg-green-600 text-white rounded-full flex items-center justify-center text-lg font-bold transition-colors duration-200 shadow-sm"
+                          title="Increase count by 1"
+                        >
+                          +
+                        </button>
+                        <button
+                          type="button"
+                          @click="decrementHourlyCount(hour)"
+                          class="w-8 h-8 bg-red-400 hover:bg-red-500 text-white rounded-full flex items-center justify-center text-lg font-bold transition-colors duration-200 shadow-sm"
+                          title="Decrease count by 1"
+                        >
+                          -
+                        </button>
+                      </div>
+                    </div>
                   </td>
                   <td class="border border-gray-300 px-3 py-3 text-sm text-gray-600">
-                    <span v-if="form.hourlyChecks[hour] > 0">{{ '|'.repeat(Math.min(form.hourlyChecks[hour], 5)) }}</span>
-                    <span v-if="form.hourlyChecks[hour] > 5">{{ '|'.repeat(Math.min(form.hourlyChecks[hour] - 5, 5)) }}</span>
-                    <span v-if="form.hourlyChecks[hour] > 10">{{ '|'.repeat(Math.min(form.hourlyChecks[hour] - 10, 5)) }}</span>
-                    <span v-if="form.hourlyChecks[hour] > 15">{{ '|'.repeat(Math.min(form.hourlyChecks[hour] - 15, 5)) }}</span>
+                    <div class="flex space-x-1">
+                      <button
+                        type="button"
+                        @click="setHourlyCount(hour, 5)"
+                        class="px-2 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 text-xs rounded transition-colors duration-200"
+                        title="Set to 5"
+                      >
+                        +5
+                      </button>
+                      <button
+                        type="button"
+                        @click="setHourlyCount(hour, 10)"
+                        class="px-2 py-1 bg-blue-100 hover:bg-blue-200 text-blue-700 text-xs rounded transition-colors duration-200"
+                        title="Set to 10"
+                      >
+                        +10
+                      </button>
+                      <button
+                        type="button"
+                        @click="setHourlyCount(hour, 0)"
+                        class="px-2 py-1 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs rounded transition-colors duration-200"
+                        title="Reset to 0"
+                      >
+                        Reset
+                      </button>
+                    </div>
                   </td>
                 </tr>
               </tbody>
@@ -762,6 +804,28 @@ const getCurrentTime = () => {
   const hours = String(now.getHours()).padStart(2, '0')
   const minutes = String(now.getMinutes()).padStart(2, '0')
   return `${hours}:${minutes}`
+}
+
+// Hourly check helper functions
+const incrementHourlyCount = (hour: string) => {
+  if (form.value.hourlyChecks[hour] === undefined) {
+    form.value.hourlyChecks[hour] = 0
+  }
+  form.value.hourlyChecks[hour]++
+}
+
+const decrementHourlyCount = (hour: string) => {
+  if (form.value.hourlyChecks[hour] === undefined) {
+    form.value.hourlyChecks[hour] = 0
+  }
+  if (form.value.hourlyChecks[hour] > 0) {
+    form.value.hourlyChecks[hour]--
+  }
+}
+
+const setHourlyCount = (hour: string, value: number) => {
+  if (value == 0) form.value.hourlyChecks[hour] = 0;
+  form.value.hourlyChecks[hour] = (form.value.hourlyChecks[hour] ?? 0) +value
 }
 
 // Initialize form with current date and time if empty
